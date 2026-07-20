@@ -1,0 +1,4 @@
+{
+  "type": "module",
+  "comment": "The client is browser-native ES modules. This file lets Node tooling (tests, node --check) parse them as ESM too."
+}
