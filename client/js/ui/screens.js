@@ -26,11 +26,17 @@ export class Screens {
   // ---------- auth ----------
   auth(mode = 'login') {
     const left = this.app.guestTrialsLeft;
+    const unlimited = !Number.isFinite(this.app.trialLimit);
     const tryBtn = left > 0
-      ? `<button class="btn warn" id="f-try">🎮 Try it free — no account needed <span class="btn-note">${left} of ${this.app.trialLimit} trial ${left === 1 ? 'match' : 'matches'} left</span></button>`
+      ? `<button class="btn warn" id="f-try">🎮 Try it free — no account needed <span class="btn-note">${unlimited ? 'unlimited demo play' : `${left} of ${this.app.trialLimit} trial ${left === 1 ? 'match' : 'matches'} left`}</span></button>`
       : `<button class="btn" disabled>🎮 Free trial used — create an account to keep playing</button>`;
+    const demoNote = this.app.isStaticDemo
+      ? `<div class="sandbox-banner">🎮 You're playing the static demo — accounts, career progression and coins need the full server
+         (<a href="https://github.com/bhavanibedreshankar/meridian-strike" style="color:var(--accent2);text-decoration:underline">run it from GitHub</a>).
+         Guest play below is fully playable.</div>` : '';
     const el = this._show(`
       ${this._title('Sign in to play — or jump straight in.')}
+      ${demoNote}
       <div class="row" style="margin-bottom:10px">
         <button class="btn small ${mode === 'login' ? 'primary' : ''}" id="tab-login">Log in</button>
         <button class="btn small ${mode === 'register' ? 'primary' : ''}" id="tab-register">Create account</button>
@@ -42,7 +48,7 @@ export class Screens {
       <button class="btn primary" id="f-go">${mode === 'login' ? 'Log in' : 'Create account'}</button>
       <div class="sub" style="margin:16px 0 6px;text-align:center">— or —</div>
       ${tryBtn}
-      <div class="sub" style="margin-top:16px;text-align:center"><a href="/" style="color:var(--muted)">← About Meridian Strike</a></div>
+      <div class="sub" style="margin-top:16px;text-align:center"><a href="../" style="color:var(--muted)">← About Meridian Strike</a></div>
     `);
     el.querySelector('#tab-login').onclick = () => this.auth('login');
     el.querySelector('#tab-register').onclick = () => this.auth('register');
@@ -134,7 +140,7 @@ export class Screens {
       <div class="topline">
         <div>
           <span class="pill gold">GUEST TRIAL</span>
-          <span class="pill ${left > 0 ? 'green' : 'red'}">${left > 0 ? `${left} free ${left === 1 ? 'match' : 'matches'} left` : 'trial used up'}</span>
+          <span class="pill ${left > 0 ? 'green' : 'red'}">${!Number.isFinite(left) ? 'unlimited demo play' : left > 0 ? `${left} free ${left === 1 ? 'match' : 'matches'} left` : 'trial used up'}</span>
           <span class="pill">${p.wins}W ${p.draws}D ${p.losses}L</span>
         </div>
       </div>
@@ -316,9 +322,11 @@ export class Screens {
       ? `<div class="sandbox-banner">🧪 Sandbox stake settled: ${paidRes.prizeCents > 0 ? 'won ' + fmtMoney(paidRes.prizeCents) : 'no payout'} (simulated funds)</div>` : '';
     const guestNudge = guest
       ? `<div class="sandbox-banner" style="border-color:var(--accent);color:var(--accent)">
-          ${left > 0
-        ? `🎮 Trial match ${this.app.guestTrialsUsed()} of ${this.app.trialLimit} played — ${left} left. Create a free account to save your record, earn coins, and climb the career ladder.`
-        : '🔓 That was your last trial match! Create a free account to keep playing — it takes 20 seconds.'}
+          ${!Number.isFinite(this.app.trialLimit)
+        ? '🎮 Demo mode — enjoying it? Run the full game from <a href="https://github.com/bhavanibedreshankar/meridian-strike" style="color:var(--accent);text-decoration:underline">the GitHub repo</a> to unlock careers, coins and tiers.'
+        : left > 0
+          ? `🎮 Trial match ${this.app.guestTrialsUsed()} of ${this.app.trialLimit} played — ${left} left. Create a free account to save your record, earn coins, and climb the career ladder.`
+          : '🔓 That was your last trial match! Create a free account to keep playing — it takes 20 seconds.'}
         </div>` : '';
     const rewardLine = guest ? '' : (serverRes ? `<h2>+${serverRes.coinsAwarded} coins</h2>` : '<div class="error-msg">Result could not be saved (offline?)</div>');
     const el = this._show(`

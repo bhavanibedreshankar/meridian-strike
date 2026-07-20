@@ -1,5 +1,9 @@
 # Meridian Strike ⚽
 
+**[▶ Launch page & playable demo](https://bhavanibedreshankar.github.io/meridian-strike/)** — try it
+in your browser right now (guest demo; accounts, career progression and the wallet need the full
+server below).
+
 A browser-based 3D soccer game: full 11v11 matches against tiered AI, a career ladder, accounts with
 server-side progression, a virtual-coin cosmetic economy — and a **real-money match module that ships
 disabled, sandboxed, and gated**, designed so licensed payment/KYC providers can be plugged in later

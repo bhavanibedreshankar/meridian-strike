@@ -17,7 +17,10 @@ class App {
     this.screens = new Screens(this);
     this.profile = null;
     this.guest = false;
-    this.trialLimit = 2;   // free matches before an account is required
+    // Static demo hosting (GitHub Pages) has no backend, so accounts are impossible
+    // there — guest play is unlimited instead of gating on a signup that can't happen.
+    this.isStaticDemo = /\.github\.io$/.test(location.hostname);
+    this.trialLimit = this.isStaticDemo ? Infinity : 2;   // free matches before an account is required
     this.settings = { halfLengthMin: 3 };
     this.match = null;
     this.stadium = null;
