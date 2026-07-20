@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Meridian Strike</title>
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="game-canvas"></canvas>
+
+<!-- Screen overlay: menus, dialogs -->
+<div id="screen-root"></div>
+
+<!-- In-match HUD -->
+<div id="hud-root" class="hidden">
+  <div id="hud-topbar">
+    <div id="hud-score">
+      <span id="hud-team-home" class="hud-team"></span>
+      <span id="hud-scoreline">0 - 0</span>
+      <span id="hud-team-away" class="hud-team"></span>
+    </div>
+    <div id="hud-clock">00:00</div>
+    <div id="hud-half">1st Half</div>
+  </div>
+  <div id="hud-banner" class="hidden"></div>
+  <div id="hud-powerbar-wrap" class="hidden"><div id="hud-powerbar"></div></div>
+  <div id="hud-hint"></div>
+  <button id="hud-pause" aria-label="Pause">⏸</button>
+</div>
+
+<!-- Touch controls (shown on touch devices during match) -->
+<div id="touch-root" class="hidden">
+  <div id="joystick-zone"><div id="joystick-base"><div id="joystick-knob"></div></div></div>
+  <div id="touch-buttons">
+    <button class="tbtn" data-action="switch">SW</button>
+    <button class="tbtn" data-action="slide">SLD</button>
+    <button class="tbtn" data-action="through">THR</button>
+    <button class="tbtn tbtn-big" data-action="pass">PASS</button>
+    <button class="tbtn tbtn-big" data-action="shoot">SHOOT</button>
+  </div>
+</div>
+
+<div id="rotate-overlay" class="hidden"><div>🔄<br>Rotate your device to landscape to play</div></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

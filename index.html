@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Strike — 11v11 soccer in your browser. No download. No signup.</title>
+<meta name="description" content="Full 11v11 3D soccer in your browser: broadcast camera, goal replays, career ladder from Amateur to Elite. Play 2 free matches instantly — no account needed.">
+<style>
+:root {
+  --bg: #0b1020; --bg2: #070b18; --panel: #101a35; --line: #26355e;
+  --green: #46d47e; --gold: #ffb830; --text: #e8eefc; --muted: #93a0bd;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg2); color: var(--text); font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- nav ---------- */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; backdrop-filter: blur(10px);
+  background: rgba(7, 11, 24, .75); border-bottom: 1px solid rgba(38, 53, 94, .5); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; max-width: 1100px; margin: 0 auto; }
+.logo { font-weight: 900; letter-spacing: 2px; font-size: 18px; }
+.logo em { color: var(--green); font-style: normal; }
+.btn { display: inline-block; padding: 12px 26px; border-radius: 10px; font-weight: 800; letter-spacing: .5px;
+  transition: transform .12s, box-shadow .12s, background .12s; cursor: pointer; border: none; font-size: 15px; }
+.btn:hover { transform: translateY(-2px); }
+.btn-green { background: var(--green); color: #06220f; box-shadow: 0 8px 30px rgba(70, 212, 126, .35); }
+.btn-green:hover { box-shadow: 0 12px 40px rgba(70, 212, 126, .5); }
+.btn-ghost { border: 1px solid var(--line); color: var(--text); background: rgba(16, 26, 53, .6); }
+.btn-sm { padding: 9px 18px; font-size: 13px; }
+
+/* ---------- hero ---------- */
+header { position: relative; padding: 150px 0 60px; overflow: hidden;
+  background:
+    radial-gradient(900px 420px at 15% -5%, rgba(70, 212, 126, .16), transparent 60%),
+    radial-gradient(900px 420px at 85% -5%, rgba(255, 184, 48, .13), transparent 60%),
+    radial-gradient(1200px 700px at 50% 120%, rgba(20, 40, 90, .55), transparent 70%),
+    var(--bg2); }
+.beams { position: absolute; inset: 0; pointer-events: none; opacity: .5; }
+.beam { position: absolute; top: -140px; width: 190px; height: 560px;
+  background: linear-gradient(to bottom, rgba(234, 242, 255, .16), transparent 75%);
+  clip-path: polygon(42% 0, 58% 0, 100% 100%, 0% 100%); filter: blur(6px);
+  animation: sway 9s ease-in-out infinite alternate; transform-origin: top center; }
+@keyframes sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+.hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1.04; font-weight: 900; letter-spacing: 1px; }
+h1 .accent { color: var(--green); text-shadow: 0 0 40px rgba(70, 212, 126, .45); }
+.tagline { margin: 20px 0 8px; font-size: clamp(17px, 2.2vw, 21px); color: var(--muted); line-height: 1.6; max-width: 34ch; }
+.tagline b { color: var(--text); }
+.cta-row { display: flex; gap: 14px; margin-top: 30px; flex-wrap: wrap; align-items: center; }
+.cta-note { font-size: 13px; color: var(--muted); }
+.cta-note b { color: var(--gold); }
+.pulse { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 8px 30px rgba(70, 212, 126, .35); } 50% { box-shadow: 0 8px 48px rgba(70, 212, 126, .65); } }
+
+/* pitch visual */
+.pitch-card { background: linear-gradient(160deg, #0d1730, #0a1226); border: 1px solid var(--line);
+  border-radius: 18px; padding: 18px; box-shadow: 0 30px 80px rgba(0, 0, 0, .55); }
+.pitch-card svg { width: 100%; height: auto; display: block; border-radius: 10px; }
+.scoreline { display: flex; justify-content: space-between; align-items: center; padding: 12px 6px 2px; font-size: 13px; }
+.scoreline .clubs { font-weight: 800; letter-spacing: 1px; }
+.scoreline .clock { color: var(--gold); font-weight: 800; font-variant-numeric: tabular-nums; }
+.live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff5566; margin-right: 6px; animation: blink 1.4s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+
+/* stats bar */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 54px auto 0; }
+.stat { text-align: center; padding: 18px 8px; background: rgba(16, 26, 53, .55); border: 1px solid var(--line); border-radius: 14px; }
+.stat .n { font-size: 26px; font-weight: 900; color: var(--green); }
+.stat .l { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.4px; margin-top: 4px; }
+
+/* ---------- sections ---------- */
+section { padding: 84px 0; }
+.kicker { color: var(--green); font-size: 13px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 900; margin: 10px 0 14px; }
+.lead { color: var(--muted); font-size: 17px; line-height: 1.7; max-width: 62ch; }
+
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 40px; }
+.feature { background: linear-gradient(165deg, rgba(16, 26, 53, .9), rgba(10, 17, 36, .9));
+  border: 1px solid var(--line); border-radius: 16px; padding: 26px; transition: transform .15s, border-color .15s; }
+.feature:hover { transform: translateY(-4px); border-color: rgba(70, 212, 126, .5); }
+.feature .ico { font-size: 30px; }
+.feature h3 { margin: 12px 0 8px; font-size: 18px; }
+.feature p { color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+.feature .tag { display: inline-block; margin-top: 12px; font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+  color: var(--gold); border: 1px solid rgba(255, 184, 48, .4); padding: 3px 10px; border-radius: 20px; }
+
+/* how it works */
+.night { background:
+  radial-gradient(800px 400px at 50% 0%, rgba(70, 212, 126, .08), transparent 65%), var(--bg); }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 40px; counter-reset: step; }
+.step { position: relative; background: rgba(16, 26, 53, .55); border: 1px solid var(--line); border-radius: 16px; padding: 30px 24px 24px; }
+.step::before { counter-increment: step; content: counter(step, decimal-leading-zero);
+  position: absolute; top: -16px; left: 20px; background: var(--green); color: #06220f;
+  font-weight: 900; font-size: 14px; padding: 6px 12px; border-radius: 8px; letter-spacing: 1px; }
+.step h3 { font-size: 17px; margin-bottom: 8px; }
+.step p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+/* tiers */
+.tier-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 36px; }
+.tier { border-radius: 16px; padding: 24px 20px; border: 1px solid var(--line); background: var(--panel); position: relative; overflow: hidden; }
+.tier::after { content: ''; position: absolute; inset: auto 0 0 0; height: 4px; background: var(--tc, var(--green)); }
+.tier .t-name { font-weight: 900; font-size: 17px; letter-spacing: 1px; }
+.tier .t-desc { color: var(--muted); font-size: 13.5px; line-height: 1.6; margin-top: 8px; }
+.tier .t-reward { margin-top: 12px; color: var(--gold); font-weight: 800; font-size: 13px; }
+
+/* honesty / arena card */
+.arena { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: start;
+  background: linear-gradient(160deg, rgba(61, 47, 8, .35), rgba(16, 26, 53, .7));
+  border: 1px solid rgba(255, 184, 48, .45); border-radius: 18px; padding: 30px; margin-top: 44px; }
+.arena .lock { font-size: 40px; }
+.arena h3 { font-size: 20px; margin-bottom: 8px; }
+.arena p { color: var(--muted); font-size: 14.5px; line-height: 1.7; }
+.arena p b { color: var(--gold); }
+
+/* tech + footer */
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.chip { border: 1px solid var(--line); background: rgba(16, 26, 53, .6); color: var(--muted);
+  padding: 8px 16px; border-radius: 30px; font-size: 13px; }
+.final { text-align: center; padding: 100px 0 90px; background:
+  radial-gradient(700px 340px at 50% 100%, rgba(70, 212, 126, .14), transparent 70%), var(--bg2); }
+.final h2 { font-size: clamp(30px, 4.6vw, 46px); }
+footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 13px; line-height: 1.8; text-align: center; }
+
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 34px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  header { padding-top: 120px; }
+  .arena { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">MERIDIAN <em>STRIKE</em></div>
+    <a class="btn btn-green btn-sm" href="play">▶ Play free</a>
+  </div>
+</nav>
+
+<header>
+  <div class="beams">
+    <div class="beam" style="left:6%"></div>
+    <div class="beam" style="right:6%; animation-delay:-4.5s"></div>
+  </div>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <h1>Full 11v11 soccer.<br>In your browser.<br><span class="accent">Right now.</span></h1>
+        <p class="tagline">No download. No install. <b>No signup for your first two matches.</b>
+          Real-time 3D with a broadcast camera, slow-mo goal replays, and a career ladder
+          that turns Sunday-league you into an Elite-tier boss.</p>
+        <div class="cta-row">
+          <a class="btn btn-green pulse" href="play">▶ &nbsp;PLAY FREE — 10 SECONDS TO KICKOFF</a>
+          <span class="cta-note"><b>2 trial matches</b> — zero account needed</span>
+        </div>
+      </div>
+
+      <div class="pitch-card">
+        <div class="scoreline">
+          <span class="clubs">AUR&nbsp; <span style="color:var(--gold)">2 – 1</span> &nbsp;IRN</span>
+          <span class="clock"><span class="live-dot"></span>87:12 · 2nd Half</span>
+        </div>
+        <svg viewBox="0 0 420 270" aria-label="Animated top-down pitch">
+          <rect width="420" height="270" fill="#173b1f"/>
+          <g opacity=".55">
+            <rect x="0" y="0" width="60" height="270" fill="#1a4223"/><rect x="120" y="0" width="60" height="270" fill="#1a4223"/>
+            <rect x="240" y="0" width="60" height="270" fill="#1a4223"/><rect x="360" y="0" width="60" height="270" fill="#1a4223"/>
+          </g>
+          <g stroke="#d9e8dc" stroke-width="2" fill="none" opacity=".9">
+            <rect x="12" y="12" width="396" height="246"/>
+            <line x1="210" y1="12" x2="210" y2="258"/>
+            <circle cx="210" cy="135" r="34"/>
+            <rect x="12" y="72" width="52" height="126"/><rect x="356" y="72" width="52" height="126"/>
+            <rect x="12" y="105" width="20" height="60"/><rect x="388" y="105" width="20" height="60"/>
+          </g>
+          <!-- defenders -->
+          <g fill="#ff6a6a">
+            <circle cx="330" cy="80" r="7"/><circle cx="345" cy="150" r="7"/>
+            <circle cx="310" cy="200" r="7"/><circle cx="260" cy="120" r="7"/><circle cx="395" cy="135" r="8" opacity=".95"/>
+          </g>
+          <!-- attackers -->
+          <g fill="#5ec4ff">
+            <circle cx="120" cy="135" r="7"/><circle cx="200" cy="70" r="7"/><circle cx="240" cy="190" r="7"/>
+            <circle cx="300" cy="115" r="8" stroke="#eaf2ff" stroke-width="2"/>
+          </g>
+          <!-- pass path + ball -->
+          <path id="passPath" d="M 120 135 C 170 90, 230 60, 300 112 S 380 130, 396 133"
+                fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-dasharray="6 7"/>
+          <circle r="5.5" fill="#fff">
+            <animateMotion dur="3.6s" repeatCount="indefinite" keyPoints="0;0.55;0.55;1" keyTimes="0;0.45;0.6;1" calcMode="linear">
+              <mpath href="#passPath"/>
+            </animateMotion>
+          </circle>
+          <circle r="10" fill="none" stroke="#46d47e" stroke-width="2" opacity=".8">
+            <animateMotion dur="3.6s" repeatCount="indefinite" keyPoints="0;0.55;0.55;1" keyTimes="0;0.45;0.6;1" calcMode="linear">
+              <mpath href="#passPath"/>
+            </animateMotion>
+            <animate attributeName="r" values="9;13;9" dur="1.2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="210" y="248" text-anchor="middle" fill="rgba(233,238,252,.65)" font-size="11"
+                font-family="system-ui" letter-spacing="2">THROUGH BALL → TOP CORNER</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">11v11</div><div class="l">Full match engine</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Career tiers</div></div>
+      <div class="stat"><div class="n">8</div><div class="l">Original clubs</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">Downloads needed</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <div class="kicker">The real thing, not a mini-game</div>
+    <h2>Every rule. Every system. Every match night.</h2>
+    <p class="lead">This isn't keepy-uppy in a canvas tag. It's a complete match engine with laws of
+      the game, thinking opponents, and a stadium that grows with your career.</p>
+    <div class="features">
+      <div class="feature"><div class="ico">⚽</div><h3>Complete 11v11 engine</h3>
+        <p>Passing, through balls, powered &amp; curled shots, slide tackles, player switching —
+        plus offside calls, fouls, yellow/red cards, corners, throw-ins, free-kick walls,
+        penalties and full shootouts.</p></div>
+      <div class="feature"><div class="ico">🧠</div><h3>AI that actually gets smarter</h3>
+        <p>Four difficulty tiers that change how opponents <i>think</i> — reaction time, decision
+        quality, marking discipline, pressing, keeper reflexes. Not just faster legs.</p></div>
+      <div class="feature"><div class="ico">📺</div><h3>Broadcast presentation</h3>
+        <p>TV-style camera with smart follow, two-angle slow-mo goal replays, floodlit nights,
+        mowing-striped grass, and a crowd that erupts when you score.</p></div>
+      <div class="feature"><div class="ico">🎮</div><h3>Play it anywhere</h3>
+        <p>Keyboard, gamepad, or touch — a virtual joystick and buttons appear automatically on
+        Android and iPhone. One URL, every device.</p></div>
+      <div class="feature"><div class="ico">🏆</div><h3>A career worth grinding</h3>
+        <p>Climb Amateur → Semi-Pro → Professional → Elite on win milestones. Every promotion
+        unlocks harder AI, a bigger stadium, and richer match rewards.</p></div>
+      <div class="feature"><div class="ico">🎽</div><h3>Make your club yours</h3>
+        <p>Earn coins every match and spend them on kits, stadium skins, and goal celebrations —
+        knee slide, backflip, or The Robot. Cosmetics only, never pay-to-win.</p>
+        <span class="tag">FREE-PLAY ECONOMY</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="night" id="how">
+  <div class="wrap">
+    <div class="kicker">Ten seconds to kickoff</div>
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><h3>Hit Play — no account</h3>
+        <p>Two full trial matches, instantly. Pick a club, meet your opponent, kick off.</p></div>
+      <div class="step"><h3>Hooked? Create a free account</h3>
+        <p>Takes 20 seconds. Your record, coins, and career progress start saving across devices.</p></div>
+      <div class="step"><h3>Climb the ladder</h3>
+        <p>Win matches to get promoted. Amateur daylight grounds become Elite floodlit cathedrals.</p></div>
+      <div class="step"><h3>Style on them</h3>
+        <p>Spend match earnings on kits, stadiums and celebrations. Then defend your tier.</p></div>
+    </div>
+
+    <div class="tier-row">
+      <div class="tier" style="--tc:#8a93a3"><div class="t-name">AMATEUR</div>
+        <div class="t-desc">Small ground, afternoon sun, forgiving opponents. Everyone starts here.</div>
+        <div class="t-reward">100 coins / win</div></div>
+      <div class="tier" style="--tc:#ffb830"><div class="t-name">SEMI-PRO</div>
+        <div class="t-desc">Dusk fixtures, sharper marking, real pressing. 3 wins to arrive.</div>
+        <div class="t-reward">180 coins / win</div></div>
+      <div class="tier" style="--tc:#5ec4ff"><div class="t-name">PROFESSIONAL</div>
+        <div class="t-desc">Floodlit bowls, disciplined back lines, keepers with reflexes.</div>
+        <div class="t-reward">300 coins / win</div></div>
+      <div class="tier" style="--tc:#46d47e"><div class="t-name">ELITE</div>
+        <div class="t-desc">The grand stage. Near-instant AI reactions. Prove it every match.</div>
+        <div class="t-reward">500 coins / win</div></div>
+    </div>
+
+    <div class="arena">
+      <div class="lock">🔒</div>
+      <div>
+        <h3>Built for stakes. Locked until it's legal.</h3>
+        <p>Meridian Strike ships with a complete skill-stakes arena — entry-fee matches, prize
+        payouts, wallet and ledger — but it is <b>disabled and sandbox-only by design</b>. Every
+        balance is simulated test currency, and the server refuses to run in live-money mode.
+        It stays locked until licensing, a regulated payment processor, certified identity
+        verification, and jurisdiction gating are in place. Until then: pure free play, and the
+        age-verification and self-exclusion controls are already built in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tech">
+  <div class="wrap">
+    <div class="kicker">Under the hood</div>
+    <h2>Zero-install by design</h2>
+    <p class="lead">Real-time WebGL that runs on the machine you already have — laptop, desktop,
+      or the phone in your pocket.</p>
+    <div class="chips">
+      <span class="chip">Three.js WebGL renderer</span>
+      <span class="chip">Procedural stadiums &amp; player animation</span>
+      <span class="chip">Ball physics with spin &amp; curve</span>
+      <span class="chip">Browser-native ES modules — no build step</span>
+      <span class="chip">Node.js + Express backend</span>
+      <span class="chip">scrypt-hashed accounts</span>
+    </div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="wrap">
+    <div class="kicker">Kickoff is one click away</div>
+    <h2>Your first two matches are on us.</h2>
+    <p class="lead" style="margin:14px auto 0">If you're not hooked by the second goal replay, we'll be genuinely surprised.</p>
+    <div class="cta-row" style="justify-content:center; margin-top:34px">
+      <a class="btn btn-green pulse" href="play">▶ &nbsp;PLAY MERIDIAN STRIKE FREE</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <b>MERIDIAN STRIKE</b> · Meridian League<br>
+    All clubs, players, kits and league branding are original fiction. No affiliation with any real
+    league, club, or athlete.<br>
+    Real-money play is unavailable pending licensing — all wallet balances are simulated test currency.
+  </div>
+</footer>
+
+</body>
+</html>
